@@ -1,8 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class RecordManager : MonoBehaviour
 {
@@ -25,16 +26,16 @@ public class RecordManager : MonoBehaviour
     public GameObject ClonePrefab;
 
     public delegate void OnResetTimelineEvent();
-
     public event OnResetTimelineEvent OnResetTimeline;
 
-    private float prevTime;
     private int _globalFrame;
     private int _localFrame;
     private int _loops;
     private RecordFrame[] _currentRecording;
+    private float _prevPlaybackSpeed;
+    private bool _ending;
 
-    private const float FixedTime = 0.02f;
+    public const float FixedTime = 0.02f;
 
     private void Awake()
     {
@@ -48,7 +49,19 @@ public class RecordManager : MonoBehaviour
         }
 
         TimelineStart();
-        InvokeRepeating("TimelineLoop", 0, FixedTime);
+        InvokeRepeating("TimelineLoop", 0, FixedTime / PlaybackSpeed);
+        _prevPlaybackSpeed = PlaybackSpeed;
+    }
+
+    private void Start()
+    {
+        LevelManager.Instance.OnEnd += OnEnd;
+    }
+
+    private void OnEnd()
+    {
+        Recordings.Add(_currentRecording);
+        _ending = true;
     }
 
     private void TimelineStart()
@@ -61,6 +74,14 @@ public class RecordManager : MonoBehaviour
 
     private void TimelineLoop()
     {
+        Debug.Log(_localFrame);
+        if (Math.Abs(PlaybackSpeed - _prevPlaybackSpeed) > 0.001f)
+        {
+            CancelInvoke("TimelineLoop");
+            _prevPlaybackSpeed = PlaybackSpeed;
+            InvokeRepeating("TimelineLoop", 0, FixedTime / PlaybackSpeed);
+        }
+
         var frames = (int)(RecordingLength / FixedTime);
 
         if (PlayState != PlaybackState.Paused)
@@ -69,13 +90,16 @@ public class RecordManager : MonoBehaviour
             _globalFrame++;
         }
 
-        //Record
-        var newRecording = new RecordFrame
+        if (!LevelManager.Instance.Ending)
         {
-            Position = Player.position
-        };
+            //Record
+            var newRecording = new RecordFrame
+            {
+                Position = Player.position
+            };
 
-        _currentRecording[_localFrame] = newRecording;
+            _currentRecording[_localFrame] = newRecording;
+        }
 
         //Play
         if (Recordings.Count > 0)
@@ -96,16 +120,30 @@ public class RecordManager : MonoBehaviour
 
         if (_localFrame >= frames - 1)
         {
-            Recordings.Add(_currentRecording);
+            if (!LevelManager.Instance.Ending)
+            {
+                Recordings.Add(_currentRecording);
+
+                foreach (var clone in Clones.ToList())
+                {
+                    clone.Index++;
+                }
+            }
+            else
+            {
+                if (_ending)
+                {
+                    foreach (var clone in Clones.ToList())
+                    {
+                        clone.Index++;
+                    }
+                    _ending = false;
+                }
+            }
 
             var newClone = CreateClone();
-            newClone.Index = -1;
+            newClone.Index = 0;
             Clones.Add(newClone);
-
-            foreach (var clone in Clones.ToList())
-            {
-                clone.Index++;
-            }
 
             if (OnResetTimeline != null)
             {
@@ -113,8 +151,6 @@ public class RecordManager : MonoBehaviour
             }
 
             _loops++;
-            Debug.Log("Took " + (Time.realtimeSinceStartup - prevTime) + " seconds");
-            prevTime = Time.realtimeSinceStartup;
             TimelineStart();
         }
     }
@@ -128,6 +164,28 @@ public class RecordManager : MonoBehaviour
     public float GetLocalTime()
     {
         return _localFrame * FixedTime;
+    }
+
+    public int GetLocalFrame()
+    {
+        return _localFrame;
+    }
+
+    public float GetGlobalTime()
+    {
+        return _globalFrame * FixedTime;
+    }
+
+    public float GetGlobalFrame()
+    {
+        return _globalFrame;
+    }
+
+    public IEnumerator PauseRestart()
+    {
+        PlayState = PlaybackState.Paused;
+        yield return new WaitForSeconds(1);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
 

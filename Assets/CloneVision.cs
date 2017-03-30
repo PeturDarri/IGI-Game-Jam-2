@@ -93,7 +93,7 @@ public class CloneVision : MonoBehaviour
             else
             {
                 //Player seen, restart level
-                StartCoroutine(Kill());
+                StartCoroutine(RecordManager.Instance.PauseRestart());
             }
         }
         else
@@ -107,12 +107,5 @@ public class CloneVision : MonoBehaviour
                 AwarenessMeter = 0;
             }
         }
-    }
-
-    private static IEnumerator Kill()
-    {
-        RecordManager.Instance.PlayState = PlaybackState.Paused;
-        yield return new WaitForSeconds(1);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
