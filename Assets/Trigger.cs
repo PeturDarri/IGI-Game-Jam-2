@@ -1,12 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Trigger : MonoBehaviour
 {
     public TriggerType TriggerType;
     public bool Inverse;
     public bool Triggered;
+    public bool DrawLines = true;
+    public bool Disabled;
 
     private bool _oneTimeUsed;
     private float _timeToReset;
@@ -15,7 +15,6 @@ public class Trigger : MonoBehaviour
     {
         if (_oneTimeUsed && RecordManager.Instance.GetGlobalTime() >= _timeToReset)
         {
-            Debug.Log("Reset trigger");
             Triggered = false;
             _oneTimeUsed = false;
         }
@@ -23,6 +22,7 @@ public class Trigger : MonoBehaviour
 
     public virtual void OnTriggerEnter(Collider other)
     {
+        if (Disabled) return;
         if (!other.CompareTag("Player") && !other.CompareTag("Clone")) return;
 
         if (TriggerType == TriggerType.OneTime)
@@ -42,6 +42,7 @@ public class Trigger : MonoBehaviour
 
     public virtual void OnTriggerExit(Collider other)
     {
+        if (Disabled) return;
         if (TriggerType == TriggerType.OneTime) return;
 
         if (other.CompareTag("Player") || other.CompareTag("Clone"))

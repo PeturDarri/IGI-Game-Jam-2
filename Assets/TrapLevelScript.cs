@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
 using UnityEngine;
 
 public class TrapLevelScript : MonoBehaviour
@@ -24,7 +21,7 @@ public class TrapLevelScript : MonoBehaviour
     private void Update()
     {
         //Restart level if the closing wall ever closes completely
-        if (ClosingWall.OpenAmount < MinOpen && RecordManager.Instance.PlayState != PlaybackState.Paused)
+        if (ClosingWall.OpenAmount < MinOpen && !RecordManager.Instance.Paused)
         {
             if (Button.Triggered)
             {
@@ -45,7 +42,6 @@ public class TrapLevelScript : MonoBehaviour
 
     private void OnButtonActivate()
     {
-        Debug.Log("Start");
         StartCoroutine(ButtonActionSequence());
     }
 

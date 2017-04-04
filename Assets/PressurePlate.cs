@@ -9,6 +9,8 @@ public class PressurePlate : Trigger
 
     public Color UntriggeredColor;
 
+    public Color DisabledColor;
+
     private Renderer _renderer;
 
     public override void Update()
@@ -20,6 +22,6 @@ public class PressurePlate : Trigger
             _renderer = GetComponent<Renderer>();
         }
 
-        _renderer.material.SetColor("_EmissionColor", Triggered ? TriggeredColor : UntriggeredColor);
+        _renderer.material.SetColor("_EmissionColor", Disabled ? DisabledColor : Triggered ? TriggeredColor : UntriggeredColor);
     }
 }

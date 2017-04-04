@@ -31,7 +31,7 @@ public class CloneVision : MonoBehaviour
 
     private void OnGUI()
     {
-        if (RecordManager.Instance.PlayState != PlaybackState.Paused)
+        if (!RecordManager.Instance.Paused)
         {
             AwarenessClock.fillAmount = AwarenessMeter;
         }
@@ -60,7 +60,7 @@ public class CloneVision : MonoBehaviour
 
         var add = ((transform.position - prevPos) - transform.forward) * 0.8f;
         transform.forward += add;
-        transform.eulerAngles = new Vector3(-90f, transform.eulerAngles.y, 0);
+        transform.eulerAngles = new Vector3(-90f, RecordManager.Instance.PlayState == PlaybackState.Playing ? transform.eulerAngles.y : -transform.eulerAngles.y, 0);
 
         prevPos = transform.position;
     }
@@ -88,19 +88,28 @@ public class CloneVision : MonoBehaviour
             //Multiply the amount awareness goes up depending on how close the player is
             if (AwarenessMeter < 1)
             {
-                AwarenessMeter += Awareness * (Mathf.Abs(Vector3.Distance(transform.position, player.position) - 11) / 3);
+                AwarenessMeter += (Awareness * (Mathf.Abs(Vector3.Distance(transform.position, player.position) - 11) / 3)) * RecordManager.Instance.PlaybackSpeed;
             }
             else
             {
                 //Player seen, restart level
-                StartCoroutine(RecordManager.Instance.PauseRestart());
+                if (SceneManager.GetActiveScene().name == "Challenge")
+                {
+                    LevelManager.Instance.EndLevel();
+                    RecordManager.Instance.Paused = true;
+                    RecordManager.Instance.PlaybackSpeed = 0.001f;
+                }
+                else
+                {
+                    StartCoroutine(RecordManager.Instance.PauseRestart());
+                }
             }
         }
         else
         {
             if (AwarenessMeter > 0)
             {
-                AwarenessMeter -= Awareness;
+                AwarenessMeter -= Awareness * RecordManager.Instance.PlaybackSpeed;
             }
             else
             {

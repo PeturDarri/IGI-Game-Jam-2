@@ -11,17 +11,22 @@ public class PlayerTimeManipulation : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetButton("Time Backwards"))
+        if (!GameManager.Instance.MovingTime)
         {
-            RecordManager.Instance.PlaybackSpeed = SlowTime;
-        }
-        else if (Input.GetButton("Time Forward"))
-        {
-            RecordManager.Instance.PlaybackSpeed = FastTime;
-        }
-        else
-        {
-            RecordManager.Instance.PlaybackSpeed = 1;
+            if (Input.GetButton("Time Backwards"))
+            {
+                RecordManager.Instance.PlaybackSpeed = SlowTime;
+            }
+            else if (Input.GetButton("Time Forward"))
+            {
+                RecordManager.Instance.PlaybackSpeed = FastTime;
+                RecordManager.Instance.PlayState = PlaybackState.Playing;
+            }
+            else
+            {
+                RecordManager.Instance.PlaybackSpeed = 1;
+                RecordManager.Instance.PlayState = PlaybackState.Playing;
+            }
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class ButtonTrigger : Trigger
@@ -38,7 +35,6 @@ public class ButtonTrigger : Trigger
         ClockImage.fillAmount = Mathf.InverseLerp(0, RecordManager.Instance.RecordingLength,
             RecordManager.Instance.GetLocalTime());
         if (_finishedLoop || !Triggered || RecordManager.Instance.GetLocalFrame() < TriggerFrame) return;
-        Debug.Log("Did it at " + RecordManager.Instance.GetLocalFrame());
         Triggered = false;
         _finishedLoop = true;
         SetColor(UnclickedColor);

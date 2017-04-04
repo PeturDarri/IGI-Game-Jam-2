@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
@@ -41,7 +39,14 @@ public class LevelManager : MonoBehaviour
 
             if (Input.GetButtonDown("Fire3") || Input.GetKeyDown(KeyCode.Return))
             {
-                NextLevel();
+                if (SceneManager.GetActiveScene().name == "Challenge")
+                {
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                }
+                else
+                {
+                    NextLevel();
+                }
             }
         }
     }
@@ -60,8 +65,16 @@ public class LevelManager : MonoBehaviour
         cam.SmoothFactor = 0.05f;
     }
 
-    private void NextLevel()
+    public void NextLevel()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        var nextIndex = LevelList.Instance.CurrentLevelIndex + 1;
+        Debug.Log(nextIndex);
+
+        if (nextIndex >= LevelList.Instance.Scenes.Count)
+        {
+            nextIndex = 0;
+        }
+
+        SceneManager.LoadScene(LevelList.Instance.Scenes[nextIndex]);
     }
 }

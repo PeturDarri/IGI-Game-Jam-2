@@ -5,13 +5,13 @@ using UnityEngine;
 public class RecordTrigger : MonoBehaviour
 {
 
-    public PlaybackState SetState;
+    public bool SetToPlay;
     public bool OneTimeUse;
 
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-        RecordManager.Instance.PlayState = SetState;
+        RecordManager.Instance.Paused = !SetToPlay;
 
         if (OneTimeUse)
         {
